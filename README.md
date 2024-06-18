@@ -3,7 +3,7 @@
 A graphical user interface (GUI) for viewing 3D CT scans and overlaying ground truth and predicted segmentation masks.
 
 <p align="center">
-  <img src="" alt="3D CT Scan Viewer">
+  <img src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/100919352/218bd145-2e37-4276-9c9e-b3afadff8d7a" alt="3D CT Scan Viewer">
 </p>
 
 ## Required Libraries
@@ -81,3 +81,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For any inquiries, please contact [AITwinMinds@gmail.com](mailto:AITwinMinds@gmail.com).
+
+[1] Li, X., Luo, G., Wang, K., Wang, H., Li, S., Liu, J., Liang, X., Jiang, J., Song, Z., Zheng, C., Chi, H., Xu, M., He, Y., Ma, X., Guo, J., Liu, Y., Li, C., Chen, Z., Siddiquee, M.M., Myronenko, A., Sanner, A.P., Mukhopadhyay, A., Othman, A.E., Zhao, X., Liu, W., Zhang, J., Ma, X., Liu, Q., MacIntosh, B.J., Liang, W., Mazher, M., Qayyum, A., Abramova, V., & Llad'o, X. (2023). The state-of-the-art 3D anisotropic intracranial hemorrhage segmentation on non-contrast head CT: The INSTANCE challenge. ArXiv, abs/2301.03281. [Arxiv]
+
+[2] X. Li, G. Luo, W. Wang, K. Wang, Y. Gao and S. Li, "Hematoma Expansion Context Guided Intracranial Hemorrhage Segmentation and Uncertainty Estimation," in IEEE Journal of Biomedical and Health Informatics, vol. 26, no. 3, pp. 1140-1151, March 2022, doi: 10.1109/JBHI.2021.3103850. [Paper]
