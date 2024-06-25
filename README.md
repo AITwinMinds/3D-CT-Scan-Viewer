@@ -1,10 +1,18 @@
-# 3D CT Scan Viewer
+<h1 align="left">3D CT Scan Viewer</h1>
+
+<img align="right" width="50" height="50" src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/127874551/b9385586-cff6-4b2a-91cc-1563e756114b" alt="ChatGPT Interface">
 
 A graphical user interface (GUI) for viewing 3D CT scans and overlaying ground truth and predicted segmentation masks.
 
+<br>
 <p align="center">
   <img src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/100919352/218bd145-2e37-4276-9c9e-b3afadff8d7a" alt="3D CT Scan Viewer">
 </p>
+
+## Updates
+
+- Update the `plot_slices` method in the `MplCanvas` class to differentiate and overlay predictions for two labels (1 and 2) on CT scan slices, using distinct colors (e.g., red for label 1 and blue for label 2).
+- Implement a square `QPushButton` styled with dynamic color changes and toggling between start (▶) and stop (■) signs to control animation, synchronizing playback from the current slice in the 3D CT scan viewer application.
 
 ## Required Libraries
 
@@ -15,6 +23,8 @@ pip install numpy nibabel PyQt5 matplotlib
 ```
 
 ## How to Use
+
+Here is the updated README to clarify both methods of naming the folders and files:
 
 ### Prepare Directories
 
@@ -27,37 +37,71 @@ If they do not exist, the script will create them automatically.
 
 ### Naming Conventions
 
-- **CT scans:** Place files in the `CT` directory. Name them as `<subject_id>.nii.gz`.
+You can name your files using one of the following two methods:
 
-  Example:
-  ```
-  CT/
-  ├── 001.nii.gz
-  ├── 002.nii.gz
-  └── 003.nii.gz
-  ```
+1. **Numeric Only IDs:**
 
-- **Ground truth segmentations:** Place files in the `Ground_truth` directory. Name them as `<subject_id>.nii.gz`.
+   - **CT scans:** Place files in the `CT` directory. Name them as `<subject_id>.nii.gz`.
 
-  Example:
-  ```
-  Ground_truth/
-  ├── 001.nii.gz
-  ├── 002.nii.gz
-  └── 003.nii.gz
-  ```
+     Example:
+     ```
+     CT/
+     ├── 001.nii.gz
+     ├── 002.nii.gz
+     └── 003.nii.gz
+     ```
 
-- **Predicted segmentations:** Place files in the `Predicted` directory. Name them as `<subject_id>.nii.gz`.
+   - **Ground truth segmentations:** Place files in the `Ground_truth` directory. Name them as `<subject_id>.nii.gz`.
 
-  Example:
-  ```
-  Predicted/
-  ├── 001.nii.gz
-  ├── 002.nii.gz
-  └── 003.nii.gz
-  ```
+     Example:
+     ```
+     Ground_truth/
+     ├── 001.nii.gz
+     ├── 002.nii.gz
+     └── 003.nii.gz
+     ```
 
-### Run the Application
+   - **Predicted segmentations:** Place files in the `Predicted` directory. Name them as `<subject_id>.nii.gz`.
+
+     Example:
+     ```
+     Predicted/
+     ├── 001.nii.gz
+     ├── 002.nii.gz
+     └── 003.nii.gz
+     ```
+
+2. **Alphanumeric IDs:**
+
+   - **CT scans:** Place files in the `CT` directory. Name them as `<subject_id>.nii.gz`.
+
+     Example:
+     ```
+     CT/
+     ├── SUB_001.nii.gz
+     ├── SUB_002.nii.gz
+     └── SUB_003.nii.gz
+     ```
+
+   - **Ground truth segmentations:** Place files in the `Ground_truth` directory. Name them as `<subject_id>.nii.gz`.
+
+     Example:
+     ```
+     Ground_truth/
+     ├── SUB_001.nii.gz
+     ├── SUB_002.nii.gz
+     └── SUB_003.nii.gz
+     ```
+
+   - **Predicted segmentations:** Place files in the `Predicted` directory. Name them as `<subject_id>.nii.gz`.
+
+     Example:
+     ```
+     Predicted/
+     ├── SUB_001.nii.gz
+     ├── SUB_002.nii.gz
+     └── SUB_003.nii.gz
+     ```
 
 Execute the script to start the GUI:
 
