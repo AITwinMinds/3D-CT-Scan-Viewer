@@ -111,11 +111,11 @@ python viewer.py
 
 ### Using the GUI
 
-- Use the left (`<`) and right (`>`) arrow buttons to navigate through different subjects.
+- Use the left (<) and right (>) arrow buttons to navigate through different subjects. You can use either numeric or alphanumeric IDs for the subjects (e.g., 001, SUB_001).
 - Enter the subject ID directly in the input field to load a specific subject.
 - Adjust the slider to navigate through slices.
 - Change the minimum and maximum intensity values to adjust the CT scan contrast.
-- Use the `Animate Slices` button to animate through all slices.
+- Use the `▶` button to animate through the slices automatically.
 - Toggle the overlay of ground truth and predicted segmentation masks using the `Toggle Overlay` button.
 
 ## License
