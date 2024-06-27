@@ -6,13 +6,13 @@ A graphical user interface (GUI) for viewing 3D CT scans and overlaying ground t
 
 <br>
 <p align="center">
-  <img src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/100919352/218bd145-2e37-4276-9c9e-b3afadff8d7a" alt="3D CT Scan Viewer">
+  <img src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/127874551/09489b28-4872-4add-9309-ba04d085d886">
 </p>
 
-## Updates
+<p align="center">
+  <img src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/127874551/c9fe4866-3ab7-4fc6-a744-a16bd81aef5f">
+</p>
 
-- Update the `plot_slices` method in the `MplCanvas` class to differentiate and overlay predictions for two labels (1 and 2) on CT scan slices, using distinct colors (e.g., red for label 1 and blue for label 2).
-- Implement a square `QPushButton` styled with dynamic color changes and toggling between start (▶) and stop (■) signs to control animation, synchronizing playback from the current slice in the 3D CT scan viewer application.
 
 ## Required Libraries
 
@@ -111,8 +111,11 @@ python viewer.py
 
 ### Using the GUI
 
-- Use the left (<) and right (>) arrow buttons to navigate through different subjects. You can use either numeric or alphanumeric IDs for the subjects (e.g., 001, SUB_001).
+- Use the left `<` and right `>` arrow buttons to navigate through different subjects. You can use either numeric or alphanumeric IDs for the subjects (e.g., 001, SUB_001).
 - Enter the subject ID directly in the input field to load a specific subject.
+- View Controls: Switch between axial, coronal, and sagittal views.
+- Toggle contour display and adjust contour line width.
+- Adjust colors for labels and opacity of overlays.
 - Adjust the slider to navigate through slices.
 - Change the minimum and maximum intensity values to adjust the CT scan contrast.
 - Use the `▶` button to animate through the slices automatically.
@@ -125,9 +128,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contact
 
 For any inquiries, please contact [AITwinMinds@gmail.com](mailto:AITwinMinds@gmail.com).
-
-## References
-
-[1] Li, X., Luo, G., Wang, K., Wang, H., Li, S., Liu, J., Liang, X., Jiang, J., Song, Z., Zheng, C., Chi, H., Xu, M., He, Y., Ma, X., Guo, J., Liu, Y., Li, C., Chen, Z., Siddiquee, M.M., Myronenko, A., Sanner, A.P., Mukhopadhyay, A., Othman, A.E., Zhao, X., Liu, W., Zhang, J., Ma, X., Liu, Q., MacIntosh, B.J., Liang, W., Mazher, M., Qayyum, A., Abramova, V., & Llad'o, X. (2023). The state-of-the-art 3D anisotropic intracranial hemorrhage segmentation on non-contrast head CT: The INSTANCE challenge. ArXiv, abs/2301.03281.
-
-[2] X. Li, G. Luo, W. Wang, K. Wang, Y. Gao and S. Li, "Hematoma Expansion Context Guided Intracranial Hemorrhage Segmentation and Uncertainty Estimation," in IEEE Journal of Biomedical and Health Informatics, vol. 26, no. 3, pp. 1140-1151, March 2022, doi: 10.1109/JBHI.2021.3103850.
