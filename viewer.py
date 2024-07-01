@@ -2,11 +2,13 @@ import sys
 import os
 import numpy as np
 import nibabel as nib
-from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QSlider, QWidget, QLineEdit, QLabel, QRadioButton, QButtonGroup)
+from PyQt5.QtWidgets import (QApplication, QGroupBox, QCheckBox, QComboBox, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QSlider, QWidget, QLineEdit, QLabel, QRadioButton, QButtonGroup, QDialog)
 from PyQt5.QtCore import Qt, QTimer
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt5.QtGui import QIcon, QIntValidator, QDoubleValidator
+import matplotlib.pyplot as plt
+
 
 color_map = {
     'red': [1, 0, 0],
@@ -19,6 +21,7 @@ color_map = {
 
 # Ensure required folders exist
 required_folders = ['CT', 'Ground_truth', 'Predicted']
+
 for folder in required_folders:
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -38,12 +41,14 @@ max_intensity = 90
 
 def load_subject_data(subject_name):
     # Initialize variables to None
+    global ct_raw
     ct_scan = ground_truth = predicted = None
 
     # Load the CT scan
     ct_scan_path = f'CT/{subject_name}.nii.gz'
     if os.path.exists(ct_scan_path):
         ct_scan = load_nii(ct_scan_path)
+        ct_raw = ct_scan.copy()
         ct_scan = normalize_ct_scan(ct_scan, min_intensity, max_intensity)
 
     # Load the Ground Truth data
@@ -116,10 +121,10 @@ class MplCanvas(FigureCanvas):
 
         if ct_scan is not None:
             self.axes1.imshow(ct_slice, cmap='gray', vmin=min_intensity, vmax=max_intensity)
-            self.axes1.set_title(f'CT Scan Slice {slice_index}', color='white')
+            self.axes1.set_title('CT', color='white')
         else:
             self.axes1.text(0.5, 0.5, 'No Image', color='white', ha='center', va='center', transform=self.axes1.transAxes)
-            self.axes1.set_title('CT Scan', color='white')
+            self.axes1.set_title('CT', color='white')
         self.axes1.axis('off')
         for spine in self.axes1.spines.values():
             spine.set_edgecolor('white')
@@ -140,10 +145,10 @@ class MplCanvas(FigureCanvas):
             if show_contour:
                 self.axes2.contour(gt_slice == 1, colors=label1_color, linewidths=line_width)
                 self.axes2.contour(gt_slice == 2, colors=label2_color, linewidths=line_width)
-            self.axes2.set_title(f'CT Scan with Ground Truth Slice {slice_index}', color='white')
+            self.axes2.set_title('CT + Ground Truth', color='white')
         else:
             self.axes2.text(0.5, 0.5, 'No Image', color='white', ha='center', va='center', transform=self.axes2.transAxes)
-            self.axes2.set_title('CT Scan with Ground Truth', color='white')
+            self.axes2.set_title('CT + Ground Truth', color='white')
         self.axes2.axis('off')
         for spine in self.axes2.spines.values():
             spine.set_edgecolor('white')
@@ -162,14 +167,19 @@ class MplCanvas(FigureCanvas):
             if show_contour:
                 self.axes3.contour(pred_slice == 1, colors=label1_color, linewidths=line_width)
                 self.axes3.contour(pred_slice == 2, colors=label2_color, linewidths=line_width)
-            self.axes3.set_title(f'CT Scan with Predicted Slice {slice_index}', color='white')
+            self.axes3.set_title('CT + Prediction', color='white')
         else:
             self.axes3.text(0.5, 0.5, 'No Image', color='white', ha='center', va='center', transform=self.axes3.transAxes)
-            self.axes3.set_title('CT Scan with Predicted', color='white')
+            self.axes3.set_title('CT + Prediction', color='white')
         self.axes3.axis('off')
         for spine in self.axes3.spines.values():
             spine.set_edgecolor('white')
 
+        self.draw()
+
+    def set_axes_visibility(self, show_ground_truth, show_prediction):
+        self.axes2.set_visible(show_ground_truth)
+        self.axes3.set_visible(show_prediction)
         self.draw()
 
 class MainWindow(QMainWindow):
@@ -180,15 +190,29 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('icon.png'))
         self.setStyleSheet("background-color: black; color: white;")
 
+        self.base_resolution = (1920, 1080)
+        self.screen_resolution = QApplication.desktop().screenGeometry()
+
+        if self.screen_resolution.width() > self.screen_resolution.height():
+            self.window_width_percentage = 44
+            self.window_height_percentage = 56
+            self.scaling_factor_width = self.screen_resolution.width() / self.base_resolution[0]
+            self.scaling_factor_height = self.screen_resolution.height() / self.base_resolution[1]
+        else:
+            self.window_width_percentage = 56
+            self.window_height_percentage = 44
+            self.scaling_factor_width = self.screen_resolution.width() / self.base_resolution[1]
+            self.scaling_factor_height = self.screen_resolution.height() / self.base_resolution[0]
+
         # Styles   
         line_edit_style = """
         QLineEdit {
             background-color: #0b130d;
-            border: 1px solid #555;
+            border: 2px solid #555;
             padding: 5px;
             border-radius: 5px;
             color: white;
-            max-width: 30px
+            max-width: {30 * self.scaling_factor_width}px
         }
         """
         
@@ -206,44 +230,127 @@ class MainWindow(QMainWindow):
         QPushButton {
             background-color: #4CAF50;
             color: white;
-            border-radius: 10px;
+            border-radius: 5px;
+            padding: 10px;
+            width: {60 * self.scaling_factor_width}px;
+        }
+        QPushButton:hover {
+            background-color: #45a049;
+        }
+        """
+        square_button_style = """
+        QPushButton {
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
             padding: 10px;
         }
         QPushButton:hover {
             background-color: #45a049;
         }
         """
-
-        square_button_style = """
-        QPushButton {
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 10px;
-            padding: 10px;
+        checkbox_style = """
+        QCheckBox {
+            color: #FFFFFF;
+            spacing: 5px;
         }
-        QPushButton:hover {
-            background-color: #45a049;
+        QCheckBox::indicator {
+            width: {30 * self.scaling_factor_width}px;
+            height: {30 * self.scaling_factor_height}px;
         }
+        QCheckBox::indicator:unchecked {
+            border: 2px solid #555;
+            background-color: #0b130d;
+        }
+        QCheckBox::indicator:checked {
+            background-color: #176cbe;
+            border: 2px solid #176cbe;
+        }
+        QCheckBox::indicator:hover {
+            border: 2px solid #104f8b;
+        }
+        """
+        groupbox_style = """
+        QGroupBox {
+            border: 2px solid #555;
+            border-radius: 5px;
+            margin-top: 2px;
+            font-weight: bold;
+            color: #FFFFFF;
+        }
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            subcontrol-position: top center;
+            padding: 0 3px;
+            background-color: #0b130d;
+        }
+        """
+        groupbox_style2 = """
+        QGroupBox {
+            border: 2px solid #555;
+            border-radius: 5px;
+            margin-top: 2px;
+            font-weight: bold;
+            color: #FFFFFF;
+        }
+        QGroupBox::title {
+            subcontrol-origin: margin;
+            subcontrol-position: top center;
+            padding: 0 3px;
+            background-color: #0b130d;
+        }
+        """
+        opacity_slider_style = """
+        QSlider::groove:horizontal {
+                height: 8px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #B1B1B1, stop:1 #c4c4c4);
+                margin: 2px 0;
+            }
+            QSlider::handle:horizontal {
+                background: #5CACEE;
+                border: 1px solid #5CACEE;
+                width: 14px;
+                margin: -2px 0;
+                border-radius: 6px;
+            }
         """
 
         layout = QVBoxLayout()
 
         self.subject_controls_layout = QHBoxLayout()
         self.prev_subject_button = QPushButton('<')
-        self.prev_subject_button.setFixedWidth(30)
+        self.prev_subject_button.setFixedWidth(int(40 * self.scaling_factor_width))
         self.subject_input = QLineEdit()
         self.subject_input.setText('SUB_001')
-        self.subject_input.setFixedWidth(80)
+        self.subject_input.setFixedWidth(int(150 * self.scaling_factor_width))
         self.next_subject_button = QPushButton('>')
-        self.next_subject_button.setFixedWidth(30)
+        self.next_subject_button.setFixedWidth(int(40 * self.scaling_factor_width))
+
+        self.shape_label = QLabel()
+        self.shape_label.setFixedHeight(int(60 * self.scaling_factor_height))
+        self.shape_label.setText("Shape: Not loaded")
 
         self.subject_controls_layout.addWidget(self.prev_subject_button)
         self.subject_controls_layout.addWidget(self.subject_input)
         self.subject_controls_layout.addWidget(self.next_subject_button)
+        self.subject_controls_layout.addWidget(self.shape_label)
         self.subject_controls_layout.addStretch()
+
         layout.addLayout(self.subject_controls_layout)
 
+        horizontal_layout = QHBoxLayout()
+
+        # Create GroupBox
+        self.Mode_options = QGroupBox("Mode")
+        self.Mode_options.setStyleSheet(groupbox_style)
+        self.Mode_options.setFixedHeight(int(70 * self.scaling_factor_height))
+
+
+
+        # Create layout for GroupBox
         self.view_controls_layout = QHBoxLayout()
+
         self.axial_radio_button = QRadioButton('Axial')
         self.axial_radio_button.setChecked(True)  # Set axial as the default view
         self.coronal_radio_button = QRadioButton('Coronal')
@@ -257,33 +364,69 @@ class MainWindow(QMainWindow):
         self.view_controls_layout.addWidget(self.axial_radio_button)
         self.view_controls_layout.addWidget(self.coronal_radio_button)
         self.view_controls_layout.addWidget(self.sagittal_radio_button)
-
         self.view_controls_layout.addStretch()
+        
+        # Set layout for GroupBox
+        self.Mode_options.setLayout(self.view_controls_layout)
 
-        layout.addLayout(self.view_controls_layout)
 
+        # Create GroupBox
+        self.visualization_options = QGroupBox("Visualization")
+        self.visualization_options.setStyleSheet(groupbox_style2)
+        self.visualization_options.setFixedHeight(int(70 * self.scaling_factor_height))
+
+
+        # Create layout for GroupBox
+        visualization_layout = QHBoxLayout()
+
+        # Create and style checkboxes
+        self.show_ground_truth_checkbox = QCheckBox('Show Ground Truth')
+        self.show_ground_truth_checkbox.setChecked(True)
+        self.show_ground_truth_checkbox.stateChanged.connect(self.update_plot)
+        self.show_ground_truth_checkbox.setStyleSheet(checkbox_style)
+
+        self.show_prediction_checkbox = QCheckBox('Show Prediction')
+        self.show_prediction_checkbox.setChecked(True)
+        self.show_prediction_checkbox.stateChanged.connect(self.update_plot)
+        self.show_prediction_checkbox.setStyleSheet(checkbox_style)
+
+        # Add checkboxes to layout
+        visualization_layout.addWidget(self.show_ground_truth_checkbox)
+        visualization_layout.addWidget(self.show_prediction_checkbox)
+
+    
         self.show_contour_checkbox = QCheckBox('Show Contour')
         self.show_contour_checkbox.setChecked(False)
         self.show_contour_checkbox.stateChanged.connect(self.contour_mode_changed)
-        layout.addWidget(self.show_contour_checkbox)
+        self.show_contour_checkbox.setStyleSheet(checkbox_style)
+
 
         self.line_width_label = QLabel('Contour Line Width:')
         self.line_width_label.setHidden(True)
         self.line_width_input = QLineEdit()
         self.line_width_input.setText('1.1')  # Default value
-        self.line_width_input.setFixedWidth(50)
+        self.line_width_input.setFixedWidth(int(40 * self.scaling_factor_width))
         self.line_width_input.setValidator(QDoubleValidator(0, 10, 2))
         self.line_width_input.setStyleSheet(line_edit_style)
         self.line_width_input.setHidden(True)
         self.line_width_input.returnPressed.connect(self.update_plot)
 
-        contour_layout = QHBoxLayout()
-        contour_layout.addWidget(self.line_width_label)
-        contour_layout.addWidget(self.line_width_input)
-        contour_layout.addStretch()
+        self.opacity_slider = QSlider(Qt.Horizontal)
+        self.opacity_slider.setMinimum(0)
+        self.opacity_slider.setMaximum(100)
+        self.opacity_slider.setValue(75)
+        self.opacity_slider.setTickInterval(1)
+        self.opacity_slider.valueChanged.connect(self.update_plot)
+        self.opacity_slider.setStyleSheet(opacity_slider_style)
+        # self.opacity_slider.setFixedSize(int(150 * self.scaling_factor_width), int(20 * self.scaling_factor_height))
+    
 
-        layout.addLayout(contour_layout)
-        
+        self.opacity_input = QLineEdit()
+        self.opacity_input.setText('75')
+        self.opacity_input.setFixedWidth(int(40 * self.scaling_factor_width))
+        self.opacity_input.textChanged.connect(self.update_opacity_slider)
+        self.opacity_input.setValidator(QIntValidator(0, 100))
+
         self.label1_color_combo = QComboBox()
         self.label1_color_combo.addItems(['red', 'green', 'blue', 'yellow', 'cyan', 'magenta'])
         self.label1_color_combo.currentIndexChanged.connect(self.update_plot)
@@ -294,34 +437,30 @@ class MainWindow(QMainWindow):
         self.label2_color_combo.currentIndexChanged.connect(self.update_plot)
         self.label2_color_combo.setStyleSheet(colors_style)
 
-        self.opacity_slider = QSlider(Qt.Horizontal)
-        self.opacity_slider.setMinimum(0)
-        self.opacity_slider.setMaximum(100)
-        self.opacity_slider.setValue(75)
-        self.opacity_slider.setTickInterval(1)
-        self.opacity_slider.valueChanged.connect(self.update_plot)
+        visualization_layout.addWidget(self.show_contour_checkbox)
+        visualization_layout.addWidget(self.line_width_label)
+        visualization_layout.addWidget(self.line_width_input)
 
-        opacity_layout = QHBoxLayout()
-        opacity_layout.addWidget(QLabel('Opacity:'))
-        opacity_layout.addWidget(self.opacity_slider)
-        self.opacity_input = QLineEdit()
-        self.opacity_input.setText('75')
-        self.opacity_input.textChanged.connect(self.update_opacity_slider)
-        self.opacity_input.setValidator(QIntValidator(0, 100))
-        opacity_layout.addWidget(self.opacity_input)
-        opacity_layout.addStretch()
-        layout.addLayout(opacity_layout)
+        visualization_layout.addWidget(QLabel('Opacity:'))
+        visualization_layout.addWidget(self.opacity_slider)
+        visualization_layout.addWidget(self.opacity_input)
 
-        self.colors = QHBoxLayout()
-        self.colors.addWidget(QLabel('Label 1 Color:'))
-        self.colors.addWidget(self.label1_color_combo)
-        self.colors.addWidget(QLabel('Label 2 Color:'))
-        self.colors.addWidget(self.label2_color_combo)
-        self.colors.addStretch()
+        visualization_layout.addWidget(QLabel('Label 1 Color:'))
+        visualization_layout.addWidget(self.label1_color_combo)
+        visualization_layout.addWidget(QLabel('Label 2 Color:'))
+        visualization_layout.addWidget(self.label2_color_combo)
+        visualization_layout.addStretch()
 
-        layout.addLayout(self.colors)
+        self.visualization_options.setLayout(visualization_layout)
 
-        self.canvas = MplCanvas(self, width=15, height=5, dpi=100)
+        # Add both GroupBoxes to the horizontal layout
+        horizontal_layout.addWidget(self.Mode_options)
+        horizontal_layout.addWidget(self.visualization_options)
+        horizontal_layout.addStretch(1)
+        layout.addLayout(horizontal_layout)
+
+
+        self.canvas = MplCanvas(self, width=int(30 * self.scaling_factor_width), height=int(5 * self.scaling_factor_height), dpi=100)
         layout.addWidget(self.canvas)
 
         self.slider = QSlider(Qt.Horizontal)
@@ -333,20 +472,22 @@ class MainWindow(QMainWindow):
 
         self.min_intensity_input = QLineEdit()
         self.min_intensity_input.setText(str(min_intensity))
-        self.min_intensity_input.setFixedWidth(50)
+        self.min_intensity_input.setFixedWidth(int(60 * self.scaling_factor_width))
         self.max_intensity_input = QLineEdit()
         self.max_intensity_input.setText(str(max_intensity))
-        self.max_intensity_input.setFixedWidth(50)
+        self.max_intensity_input.setFixedWidth(int(60 * self.scaling_factor_width))
 
         self.duration_input = QLineEdit()
         self.duration_input.setText("20")
-        self.duration_input.setFixedWidth(50)
+        self.duration_input.setFixedWidth(int(60 * self.scaling_factor_width))
 
         self.prev_button = QPushButton('<')
         self.next_button = QPushButton('>')
         self.animate_button = QPushButton('▶')
         self.toggle_overlay_button = QPushButton('Toggle Overlay')
+        self.plot_histogram_button = QPushButton('Plot Intensity Histogram')
 
+        self.plot_histogram_button.clicked.connect(self.plot_intensity_histogram)
         self.prev_button.clicked.connect(self.prev_slice)
         self.next_button.clicked.connect(self.next_slice)
         self.animate_button.clicked.connect(self.toggle_animation)
@@ -366,6 +507,8 @@ class MainWindow(QMainWindow):
         self.toggle_overlay_button.setStyleSheet(button_style)
         self.prev_subject_button.setStyleSheet(button_style)
         self.next_subject_button.setStyleSheet(button_style)
+        self.plot_histogram_button.setStyleSheet(button_style)
+        
 
         self.animate_button.setStyleSheet(square_button_style)
 
@@ -389,6 +532,8 @@ class MainWindow(QMainWindow):
         controls_layout.addWidget(self.next_button)
         controls_layout.addWidget(self.animate_button)
         controls_layout.addWidget(self.toggle_overlay_button)
+        controls_layout.addWidget(self.plot_histogram_button)
+
 
         layout.addLayout(controls_layout)
 
@@ -429,6 +574,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.subject_input.setText('Error')
             print(f"Error loading subject {subject_name}: {e}")
+        self.update_shape_label()
 
     def prev_subject(self):
         current_subject = self.subject_input.text()
@@ -445,6 +591,18 @@ class MainWindow(QMainWindow):
         self.load_subject()
 
     def update_plot(self):
+        show_ground_truth = self.show_ground_truth_checkbox.isChecked()
+        show_prediction = self.show_prediction_checkbox.isChecked()
+
+        if show_ground_truth and show_prediction:
+            self.canvas.set_axes_visibility(True, True)
+        elif show_ground_truth:
+            self.canvas.set_axes_visibility(True, False)
+        elif show_prediction:
+            self.canvas.set_axes_visibility(False, True)
+        else:
+            self.canvas.set_axes_visibility(False, False)
+
         min_intensity = int(self.min_intensity_input.text())
         max_intensity = int(self.max_intensity_input.text())
         view = self.view_type()
@@ -466,6 +624,7 @@ class MainWindow(QMainWindow):
             self.slider.setMaximum(0)
         slice_index = self.slider.value()
         self.canvas.plot_slices(slice_index, min_intensity, max_intensity, self.ct_scan, self.ground_truth, self.predicted, self.show_overlay_flag, view, show_contour, label1_color, label2_color, opacity, line_width)
+        self.update_shape_label()
 
     def view_type(self):
         if self.axial_radio_button.isChecked():
@@ -500,8 +659,8 @@ class MainWindow(QMainWindow):
         QPushButton {
             background-color: #f44336;
             color: white;
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: {5 * self.scaling_factor_width}px;
+            padding: {10 * self.scaling_factor_width}px;
         }
         QPushButton:hover {
             background-color: #d32f2f;
@@ -516,8 +675,8 @@ class MainWindow(QMainWindow):
         QPushButton {
             background-color: #4CAF50;
             color: white;
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: {5 * self.scaling_factor_width}px;
+            padding: {10 * self.scaling_factor_width}px;
         }
         QPushButton:hover {
             background-color: #45a049;
@@ -533,6 +692,57 @@ class MainWindow(QMainWindow):
         self.show_overlay_flag = True
         self.update_plot()
 
+    def plot_intensity_histogram(self):
+        if hasattr(self, 'ct_scan') and ct_raw is not None:
+            # Flatten the ct_raw data
+            data = ct_raw.flatten()
+
+            # Compute statistics
+            mean_intensity = np.mean(data)
+            median_intensity = np.median(data)
+
+            plt.figure(figsize=(10, 6))
+
+            # Plot histogram
+            plt.hist(data, bins=170, color='#4682B4', alpha=0.7, rwidth=0.85)
+
+            # Plot mean and median lines
+            plt.axvline(mean_intensity, color='red', linestyle='--', linewidth=1, label=f'Mean: {mean_intensity:.2f}')
+            plt.axvline(median_intensity, color='green', linestyle='-', linewidth=1, label=f'Median: {median_intensity:.2f}')
+
+            # Add title and labels
+            plt.title('CT Scan Intensity Histogram', fontsize=16, fontweight='bold')
+            plt.xlabel('Intensity', fontsize=14)
+            plt.ylabel('Frequency', fontsize=14)
+
+            # Add grid
+            plt.grid(color='gray', linestyle='-', linewidth=0.5, alpha=0.7)
+
+            # Add legend
+            plt.legend()
+
+            # Adding annotations
+            plt.annotate(f'Mean: {mean_intensity:.2f}', xy=(mean_intensity, plt.ylim()[1] * 0.9), 
+                        xytext=(mean_intensity + 100, plt.ylim()[1] * 0.9),
+                        arrowprops=dict(facecolor='red', shrink=0.05), fontsize=12, color='red')
+            plt.annotate(f'Median: {median_intensity:.2f}', xy=(median_intensity, plt.ylim()[1] * 0.8), 
+                        xytext=(median_intensity + 100, plt.ylim()[1] * 0.8),
+                        arrowprops=dict(facecolor='green', shrink=0.05), fontsize=12, color='green')
+
+            # Display the plot
+            plt.show()
+        else:
+            print('No CT scan data loaded.')
+
+    def update_shape_label(self):
+        if self.ct_scan is not None:
+            shape_text = f"Shape: {self.ct_scan.shape} | Slice: {self.slider.value()}"
+        else:
+            self.shape_label.setText("Shape: Not loaded")
+        self.shape_label.setText(shape_text)
+
+
+          
 # Run the application
 app = QApplication(sys.argv)
 window = MainWindow()
