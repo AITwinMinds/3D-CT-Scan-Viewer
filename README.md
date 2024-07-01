@@ -6,11 +6,11 @@ A graphical user interface (GUI) for viewing 3D CT scans and overlaying ground t
 
 <br>
 <p align="center">
-  <img src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/127874551/09489b28-4872-4add-9309-ba04d085d886">
+  <img src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/100919352/709e1fa6-0baf-4c80-8d86-3ca7683b2017">
 </p>
 
 <p align="center">
-  <img src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/127874551/c9fe4866-3ab7-4fc6-a744-a16bd81aef5f">
+  <img src="https://github.com/AITwinMinds/3D-CT-Scan-Viewer/assets/100919352/c5b373fe-1de8-420f-aaa5-32ee979daa4b">
 </p>
 
 
@@ -120,6 +120,7 @@ python viewer.py
 - Change the minimum and maximum intensity values to adjust the CT scan contrast.
 - Use the `▶` button to animate through the slices automatically.
 - Toggle the overlay of ground truth and predicted segmentation masks using the `Toggle Overlay` button.
+- Plot intensity histogram
 
 ## License
 
