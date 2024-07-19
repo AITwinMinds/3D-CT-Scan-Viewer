@@ -122,6 +122,14 @@ python viewer.py
 - Toggle the overlay of ground truth and predicted segmentation masks using the `Toggle Overlay` button.
 - Plot intensity histogram
 
+## Support Us
+
+If you find it helpful, consider supporting us in the following ways:
+
+- ⭐ Star this repository on [GitHub](https://github.com/AITwinMinds/3D-CT-Scan-Viewer).
+  
+- 🐦 Follow us on X (Twitter): [@AITwinMinds](https://twitter.com/AITwinMinds)
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
